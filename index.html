@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html><head>
+<html>
+
+<head>
     <title>ccfolia log getter</title>
     <script src="jquery-3.5.1.min.js"></script>
     <script>
@@ -168,6 +170,37 @@
                 request.send();
                 request.addEventListener("load", http_request_callback);
             });
+
+            // ボタン：保存(HTML)
+            $('#save_html').click(function(e) {
+                var header = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>チャットログ</title></head><body>' + RET;
+                var main = convertToHTML($(get_tab_dom_id(get_current_tab())));
+                var footer = RET + '</body></html>';
+                var doc = header + main + footer;
+                // LF => CRLF
+                doc = doc.split(/\r?\n/);
+                doc = doc.join(CRLF);
+                var blob = new Blob([doc], {
+                    "type": "text/html"
+                });
+                $("<a></a>", {
+                    href: window.URL.createObjectURL(blob),
+                    download: "log_" + current_room_id + "_" + tab_list[get_current_tab()] + ".html",
+                    target: "_blank"
+                })[0].click();
+            });
+
+            // ボタン：保存(JSON)
+            $('#save_json').click(function(e) {
+                var doc = JSON.stringify(message_json, null, "    ");
+                var blob = new Blob([doc], {
+                    "type": "text/json"
+                });
+                $("<a></a>", {
+                    href: window.URL.createObjectURL(blob),
+                    download: "log_" + current_room_id + ".json",
+                    target: "_blank"
+                })[0].click();
             });
         });
     </script>
@@ -176,12 +209,14 @@
 <body>
     <input type="text" id="room_id" placeholder="ルームIDを入力">
     <input type="button" id="get_log" value="ログを取得">
+    <input type="button" id="save_html" value="保存(HTML)">
+    <input type="button" id="save_json" value="保存(JSON)">
     <div>
         <span id="progress"></span>
         <span id="log_number"></span>
     </div>
     <form id="html_selector"></form>
     <div id="html"></div>
+</body>
 
-
-</body></html>
+</html>
